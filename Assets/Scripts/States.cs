@@ -54,6 +54,10 @@ public class DuckingState : IPlayerState{
             StandingState standing = new StandingState();
             standing.Enter(controller);
         }
+        if(Input.GetKey(KeyCode.Space)){
+            SuperJumpState superJump = new SuperJumpState();
+            superJump.Enter(controller);
+        }
     }
 }
 
@@ -69,13 +73,16 @@ public class JumpingState : IPlayerState{
 
     public void Execute(PlayerController controller){
         if(Physics.Raycast(_rb.transform.position, Vector3.down, 0.5f) && (Time.time - jumpTime > 0.5f)){
-            Debug.Log("grounded");
             StandingState standing = new StandingState();
             standing.Enter(controller);            
         }
         if(Input.GetKey(KeyCode.LeftShift)){
             DivingState dive = new DivingState();
             dive.Enter(controller);
+        }
+        if(Input.GetKey(KeyCode.Space) && Time.time - jumpTime > 0.1f){
+            DoubleJumpState doubleJump = new DoubleJumpState();
+            doubleJump.Enter(controller);
         }
     }
 }
@@ -97,6 +104,50 @@ public class DivingState : IPlayerState{
                 nextState = new StandingState();
             }
             nextState.Enter(controller);
+        }
+    }
+}
+
+public class DoubleJumpState : IPlayerState{
+    Rigidbody _rb;
+    float jumpTime;
+    public void Enter(PlayerController controller){
+        _rb = controller.GetComponent<Rigidbody>();
+        _rb.velocity = new Vector3(0,10,0);
+        jumpTime = Time.time;
+        controller.currentState = this;        
+    }   
+
+    public void Execute(PlayerController controller){
+        if(Physics.Raycast(_rb.transform.position, Vector3.down, 0.5f) && (Time.time - jumpTime > 0.5f)){
+            StandingState standing = new StandingState();
+            standing.Enter(controller);            
+        }
+        if(Input.GetKey(KeyCode.LeftShift)){
+            DivingState dive = new DivingState();
+            dive.Enter(controller);
+        }        
+    }
+}
+
+public class SuperJumpState : IPlayerState{
+    Rigidbody _rb;
+    float jumpTime;
+    public void Enter(PlayerController controller){
+        _rb = controller.GetComponent<Rigidbody>();
+        _rb.velocity = new Vector3(0,30,0);
+        jumpTime = Time.time;
+        controller.currentState = this;        
+    }
+
+    public void Execute(PlayerController controller){
+        if(Physics.Raycast(_rb.transform.position, Vector3.down, 0.5f) && (Time.time - jumpTime > 0.5f)){
+            StandingState standing = new StandingState();
+            standing.Enter(controller);            
+        }
+        if(Input.GetKey(KeyCode.LeftShift)){
+            DivingState dive = new DivingState();
+            dive.Enter(controller);
         }
     }
 }
